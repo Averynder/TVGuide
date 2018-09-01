@@ -1,12 +1,18 @@
 import java.util.ArrayList;
 
-public class TVShow implements Watchable
+/**
+ * TVShow class
+ */
+public class TVShow implements Watchable, Cloneable
 {
     private static int currentID = 0;
-    private static ArrayList<String> showListIDs = new ArrayList<String>();
+    private static ArrayList<String> showListIDs = new ArrayList<String>(0);
     private String showID, showName;
     private double startTime, endTime;
 
+    /**
+     * Default constructor for the TVShow class
+     */
     public TVShow()
     {
         showName = "Law & Order";
@@ -16,6 +22,11 @@ public class TVShow implements Watchable
         showListIDs.add(showID);
     }
 
+    /**
+     * Parameterized constructor for the TVShow class
+     * @param tvshow1 input object of TVShow class
+     * @param showID input string which identifies the ID of the show
+     */
     public TVShow(TVShow tvshow1, String showID)
     {
         this.showName = tvshow1.showName;
@@ -24,6 +35,13 @@ public class TVShow implements Watchable
         addID(showID);
     }
 
+    /**
+     *  Default constructor for the TVShow class
+     * @param showID input string which identifies the ID of the show
+     * @param showName input string which identifies the name of the show
+     * @param startTime input double which identifies the start time of the show
+     * @param endTime input double which identifies the end time of the show
+     */
     public TVShow(String showID, String showName, double startTime, double endTime)
     {
         addID(showID);
@@ -32,17 +50,102 @@ public class TVShow implements Watchable
         this.endTime = endTime;
     }
 
+    /**
+     * Method adds ID to the object
+     * @param showID input string corresponding to the show ID
+     */
     private void addID(String showID)
     {
         boolean idTaken = false;
-        for (int i = showListIDs.size(); i > 0; i--)
+        for (int i = showListIDs.size() - 1; i > 0; i--)
         {
             if (showListIDs.get(i).equals(showID))
             {
-                System.out.println("The ID was taken already, thus a new one will be assigned");
+                System.out.print("The ID " + showID + " was taken already, thus a new one will be assigned: " /*+ currentID*/);
                 idTaken = true;
             }
         }
+        if (idTaken)
+        {
+            idTaken = false;
+            showID = "" + currentID;
+            //System.out.println(showID);
+            do
+            {
+                idTaken = false;
+                for (int i = showListIDs.size() - 1; i > 0; i--)
+                {
+                    if (showListIDs.get(i).equals(showID))
+                    {
+                        idTaken = true;
+                        currentID++;
+                    }
+                }
+                if (idTaken)
+                    showID = "" + currentID;
+            } while(idTaken);
+            System.out.println(showID);
+        }
+        /*
+        do
+        {
+            idTaken = false;
+            for (int i = showListIDs.size() - 1; i > 0; i--)
+            {
+                if (showListIDs.get(i).equals(showID))
+                {
+                    idTaken = true;
+                    currentID++;
+                }
+            }
+            if (idTaken)
+                showID = "" + currentID;
+        } while(idTaken);
+        */
+        //if (!idTaken)
+            this.showID = showID;
+        /*
+        else // shouldn't ever be run
+        {
+            System.out.println("here");
+            this.showID = "" + currentID++;
+            System.out.println(this.showID);//
+        }
+        */
+        showListIDs.add(this.showID);
+        
+    }
+
+    /**
+     * Parameterized constructor for the TVShow class
+     * @param showID input string corresponding to the show ID
+     * @param tvshow1 input object corresponding to the TVShow
+     */
+    TVShow(String showID, TVShow tvshow1)
+    {
+        this.showName = tvshow1.showName;
+        this.startTime = tvshow1.startTime;
+        this.endTime = tvshow1.endTime;
+        
+        boolean idTaken = false;
+        for (int i = showListIDs.size() - 1; i > 0; i--)
+            if (showListIDs.get(i).equals(showID))
+                idTaken = true;
+        idTaken = false;
+        showID = "" + currentID;
+        do
+        {
+            idTaken = false;
+            for (int i = showListIDs.size() - 1; i > 0; i--)
+            {
+                if (showListIDs.get(i).equals(showID))
+                {
+                    idTaken = true;
+                    currentID++;
+                }
+            }
+            showID = "" + currentID;
+        } while(idTaken);
         if (!idTaken)
             this.showID = showID;
         else
@@ -50,300 +153,41 @@ public class TVShow implements Watchable
         showListIDs.add(this.showID);
     }
 
+    /**
+     * Method which returns a boolean depending on the times overlap of the of shows
+     * @param time1 the start time
+     * @param time2 the end time
+     * @return a boolean depending on the times overlap of the of shows
+     */
     private boolean sameTime(double time1, double time2)
     {
         return (Math.abs(time1 - time2) < 0.01);
     }
 
-    private double[] initialTimeTests(TVShow s1)
-    {
-        boolean trialrun = true;
-        double start1 = startTime;
-        double end1 = endTime;
-        double start2 = s1.startTime;
-        double end2 = s1.endTime;
-
-        while (trialrun)
-        {
-            try
-            {
-                // Negative Issues
-                if (start1 < 0)
-                    throw new TimeIssueException(1, true, showID);
-                if (end1 < 0)
-                    throw new TimeIssueException(1, false, showID);
-                if (start2 < 0)
-                    throw new TimeIssueException(1, true, s1.showID);
-                if (end2 < 0)
-                    throw new TimeIssueException(1, false, s1.showID);
-
-                // FIX THIS, times < 24 hours should be allowed
-                // Times are Greater than 24 hours
-                if (start1 > 24.00)
-                    throw new TimeIssueException(2, true, showID);
-                if (start2 > 24.00)
-                    throw new TimeIssueException(2, true, s1.showID);
-                if (end1 > 24.00)
-                    throw new TimeIssueException(3, true, showID);
-                if (end2 > 24.00)
-                    throw new TimeIssueException(3, true, s1.showID);
-
-                // Times past 59 minutes
-                if (start1 > Math.floor(start1) + 0.59)
-                    throw new TimeIssueException(2, false, showID);
-                if (start2 > Math.floor(start2) + 0.59)
-                    throw new TimeIssueException(2, false, s1.showID);
-                if (end1 > Math.floor(end1) + 0.59)
-                    throw new TimeIssueException(3, false, showID);
-                if (end2 > Math.floor(end2) + 0.59)
-                    throw new TimeIssueException(3, false, s1.showID);
-
-                // Gotten Here means no initial issues
-                trialrun = false;
-            }
-            catch (TimeIssueException TIE)
-            {
-                System.out.println(TIE.getMessage());
-                System.out.println("Attempting to fix issue");
-                switch(TIE.getCaseNum())
-                {
-                    case 1:
-                        if (TIE.getObjName().equals(showID))
-                            if (TIE.getIsTopOrBottum())
-                                start1 = Math.abs(start1);
-                            else
-                                end1 = Math.abs(end1);
-                        else
-                        if (TIE.getIsTopOrBottum())
-                            start2 = Math.abs(start2);
-                        else
-                            end2 = Math.abs(end2);
-                        break;
-                    case 2:
-                        if (TIE.getObjName().equals(showID))
-                            if (TIE.getIsTopOrBottum())
-                                while (start1 > 24.00)
-                                {
-                                    start1 -= 24.00;
-                                }
-                            else
-                                while(start1 - Math.floor(start1) > 0.59)
-                                {
-                                    start1 += 1.00;
-                                    start1 -= 0.60;
-                                }
-                        else
-                        if (TIE.getIsTopOrBottum())
-                            while (start2 > 24.00)
-                            {
-                                start2 -= 24.00;
-                            }
-                        else
-                            while(start2 - Math.floor(start2) > 0.59)
-                            {
-                                start2 += 1.00;
-                                start2 -= 0.60;
-                            }
-                        break;
-                    case 3:
-                        if (TIE.getObjName().equals(showID))
-                            if (TIE.getIsTopOrBottum())
-                                while (end1 > 24.00)
-                                {
-                                    end1 -= 24.00;
-                                }
-                            else
-                                while(end1 - Math.floor(end1) > 0.59)
-                                {
-                                    end1 += 1.00;
-                                    end1 -= 0.60;
-                                }
-                        else
-                        if (TIE.getIsTopOrBottum())
-                            while (end2 > 24.00)
-                            {
-                                end2 -= 24.00;
-                            }
-                        else
-                            while(end2 - Math.floor(end2) > 0.59)
-                            {
-                                end2 += 1.00;
-                                end2 -= 0.60;
-                            }
-                }
-            }
-        }
-
-        double[] results = {start1,end1,start2,end2};
-        return results;
-    }
-
-    private boolean timeOverlap(TVShow s1)
-    {
-        double[] results = initialTimeTests(s1);
-        /*
-        if (results.length == 4)
-        {
-            startTime = results[0];
-            endTime = results[1];
-            s1.startTime = results[2];
-            s1.endTime = results[3];
-        }
-        else
-        {
-            System.out.println("Something went wrong in the initialTimeTests");
-            return false;
-        }
-        */
-        // Now it is known that the numbers dealt with are from 0:00 - 23:59
-        // Next Step, Sort in order
-
-        System.out.println("===========================");
-        System.out.println("results[0]: " + results[0]);
-        System.out.println("results[1]: " + results[1]);
-        System.out.println("results[2]: " + results[2]);
-        System.out.println("results[3]: " + results[3]);
-        System.out.println("===========================");
-
-        int current = 1;
-        for (int count = 0; count < results.length; count++)
-        {
-            int j = current + 1;
-            int l = current - 1;
-            if(j < results.length)
-            {
-                if (results[current] > results[j])
-                {
-                    int exchange = current;
-                    while (j < results.length & results[exchange] > results[j])
-                    {
-                        double temp = results[j];
-                        results[j] = results[exchange];
-                        results[exchange] = temp;
-                        exchange = j;
-                        j++;
-                    }
-                }
-                else if (results[l] > results[current])
-                {
-                    int exchange = current;
-                    while (l > -1 & results[l] > results[exchange])
-                    {
-                        double temp = results[exchange];
-                        results[exchange] = results[l];
-                        results[l] = temp;
-                        exchange = l;
-                        if (l != 0)
-                            l--;
-                    }
-                }
-                else
-                    current++;
-            }
-        }
-            /*
-            for (int i = 0; i < results.length - 1; i++)
-            {
-                if (results[i] < results[i+1])
-                    counter++;
-            }
-            
-            if (counter == results.length - 2)
-                isSorted = true;
-            else
-                counter = 0;
-            System.out.println("Hit me");
-            */
-
-        System.out.println("===========================");
-        System.out.println("results[0]: " + results[0]);
-        System.out.println("results[1]: " + results[1]);
-        System.out.println("results[2]: " + results[2]);
-        System.out.println("results[3]: " + results[3]);
-        System.out.println("===========================");
-        // results is now sorted but FORGOT which values are which...
-
-        // positionsInResults [0] = startTime position in results
-        // positionsInResults [1] = endTime position in results
-        // positionsInResults [2] = s1.startTime position in results
-        // positionsInResults [3] = s1.endTime position in results
-        // positionsInResults holds position in results       [0]       [1]         [2]          [3]
-        int[] positionsInResults = positionFinder(results, startTime, endTime, s1.startTime, s1.endTime);
-
-        // Now it's sorted values in results, and I know where their positions are in the Results array
-
-        if (positionsInResults[0] == 0 || positionsInResults[2] == 0) // first num is a start
-        {
-            if (positionsInResults[0] == 0)         // first num is start1
-                if (positionsInResults[1] == 1)     // 2nd num is start2
-                    if (positionsInResults[2] == 2) // 3rd num is end1, thus NO overlapp
-                        return false;
-                    else                                    // first num is start2
-                        if (positionsInResults[3] == 1)     // 2nd num is start2
-                            if (positionsInResults[0] == 2) // 3rd num is end1, thus NO overlapp
-                                return false;
-        }
-        else // first num is an end
-        {
-            if (positionsInResults[1] == 0)         // last num is start1
-                if (positionsInResults[2] == 1)     // first num is end1
-                    if (positionsInResults[3] == 2) // 2nd num is start2, thus NO overlapp
-                        return false;
-                    else                                    // first num is end2
-                        if (positionsInResults[2] == 3)
-                            if (positionsInResults[1] == 2)
-                                return false;
-        }
-        return true;
-    }
-
-    private int[] positionFinder(double[] searchy, double...elements)
-    {
-        System.out.println("===========================");
-        System.out.println("elements[0]: " + elements[0]);
-        System.out.println("elements[1]: " + elements[1]);
-        System.out.println("elements[2]: " + elements[2]);
-        System.out.println("elements[3]: " + elements[3]);
-        System.out.println("===========================");
-        int positionCount = 0; // element I searching for
-        boolean[] found = new boolean[searchy.length];
-        for (int i = 0; i < found.length; i++)
-        {found[i] = false;}
-
-        int[] positionsInResults = new int[searchy.length];
-        while (positionCount < searchy.length)
-        {
-            for (int i = 0; i < elements.length; i++)
-            {
-                if (elements[positionCount] == searchy[i] && !found[i])
-                {
-                    positionsInResults[positionCount] = i;
-                    found[i] = true;
-                    break;
-                }
-            }
-            positionCount++;
-        }
-        System.out.println("===========================");
-        System.out.println("position[0]: " + positionsInResults[0]);
-        System.out.println("position[1]: " + positionsInResults[1]);
-        System.out.println("position[2]: " + positionsInResults[2]);
-        System.out.println("position[3]: " + positionsInResults[3]);
-        System.out.println("===========================");
-        return positionsInResults;
-    }
-
-    @Override protected TVShow clone()
+    /**
+     * Clone method
+     * @return returns a clone of the object
+     */
+    @Override public TVShow clone()
     {
         return new TVShow(this, "" + currentID++);
     }
 
+    /**
+     * personalized toString method
+     * @return returns a string with concise and clear information of the object.
+     */
     @Override public String toString()
     {
-        return ("The show's name is: " + showName + " and it's ID is: " + showID +
-                ",\nit starts at: " + startTime + ", and ends at: " + endTime);
+        return ("showID: " + showID + "\nshowName: " + showName +
+                "\nstartTime: " + startTime + "\nendTime: " + endTime);
     }
 
+    /**
+     * returns a boolean depending on equality fo compared objects
+     * @param s1 the TVShow object passed by the method
+     * @return a boolean depending on equality fo compared objects
+     */
     @Override public boolean equals(Object s1)
     {
         if (s1 == null)
@@ -355,50 +199,111 @@ public class TVShow implements Watchable
                 sameTime(this.endTime, ((TVShow) s1).endTime));
     }
 
+    /**
+     * Returns a string depending on whether the shows are on the same time or not
+     * @param s1  the TVShow object passed by the method
+     * @return a string depending on whether the shows are on the same time or not
+     */
     public String isOnSameTime(TVShow s1)
     {
         if (sameTime(this.startTime, s1.startTime) && sameTime(this.endTime, s1.endTime))
             return "Same Time";
-        if (timeOverlap(s1))
+        if (timeOverlap2(s1))
             return "Some Overlap";
         return "Different Time";
     }
 
+    /**
+     * returns a boolean depending on overlap
+     * @param s1 the TVShow object passed by the method
+     * @return a boolean depending on overlap
+     */
+    public boolean timeOverlap2(TVShow s1)
+    {
+        if (endTime <= s1.startTime || s1.endTime <= startTime)
+            return false;
+        return true;
+    }
+
+    /**
+     * Method returns a string corresponding to the ShowID
+     * @return a string corresponding to the ShowID
+     */
     public String getShowID()
     {
         return showID;
     }
 
+    /**
+     * Method returns a string corresponding to the Show Name
+     * @return a string corresponding to the Show Name
+     */
     public String getShowName()
     {
         return showName;
     }
 
+    /**
+     *  Method returns a double corresponding to the Start Time
+     * @return a double corresponding to the Start Time
+     */
     public double getStartTime()
     {
         return startTime;
     }
 
+    /**
+     *  Method returns a double corresponding to the End Time
+     * @return a double corresponding to the End Time
+     */
     public double getEndTime()
     {
         return endTime;
     }
 
+    /**
+     * Method sets the ShowID
+     * @param showID input user string which will set the Show ID accordingly
+     */
     public void setShowID(String showID)
     {
-        this.showID = showID;
+        addID(showID);
     }
 
+    /**
+     * Method sets the ShowIDadmin
+     * @param showID input user string which will set the Show ID admin accordingly
+     */
+    void setShowIDadmin(String showID)
+    {
+        this.showID = showID;
+        int size = showListIDs.size() - 1;
+        showListIDs.remove(size);
+        currentID--;
+    }
+
+    /**
+     * Method sets the showName
+     * @param showName input user string which will set the Show ID accordingly
+     */
     public void setShowName(String showName)
     {
         this.showName = showName;
     }
 
+    /**
+     *  Method sets the start time
+     * @param startTime input user string which will set the start time accordingly
+     */
     public void setStartTime(double startTime)
     {
         this.startTime = startTime;
     }
 
+    /**
+     *  Method sets the end time
+     * @param endTime input user string which will set the end time accordingly
+     */
     public void setEndTime(double endTime)
     {
         this.endTime = endTime;
